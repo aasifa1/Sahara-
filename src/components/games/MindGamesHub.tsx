@@ -312,18 +312,15 @@ export const MindGamesHub: React.FC<MindGamesHubProps> = ({
                           Game #{index + 1}
                         </span>
                         <h3 className="text-xl sm:text-2xl font-black text-[#2C2724] tracking-tight group-hover:text-[#3B7A57] transition-colors leading-tight">
-                          {game.title}
+                          {game.regionalTitle[language] || game.title}
                         </h3>
-                        <p className="text-xs sm:text-sm font-extrabold text-[#3B7A57] mt-0.5 truncate">
-                          {game.regionalTitle[language] || game.regionalTitle.en}
-                        </p>
+                        {language !== 'en' && (
+                          <p className="text-xs sm:text-sm font-extrabold text-[#3B7A57] mt-0.5 truncate">
+                            {game.title}
+                          </p>
+                        )}
                       </div>
                     </div>
-
-                    {/* Description */}
-                    <p className="text-xs sm:text-sm text-[#5C5046] leading-relaxed mb-4">
-                      {game.subtitle}
-                    </p>
 
                     {/* Tags */}
                     <div className="flex flex-wrap gap-1.5 mb-4">
@@ -386,7 +383,7 @@ export const MindGamesHub: React.FC<MindGamesHubProps> = ({
                         : 'bg-[#F6EFE3] hover:bg-[#EAE0D0] text-[#594E43]'
                     }`}
                   >
-                    {g.title}
+                    {g.regionalTitle[language] || g.title}
                   </button>
                 );
               })}
