@@ -1,0 +1,10 @@
+{
+  "name": "Sahara — Cognitive Companion",
+  "description": "AI-powered cognitive gaming, memory assistance, and caregiver monitoring platform for elderly dementia patients in India's North Eastern Region.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

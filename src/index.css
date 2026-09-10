@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-color: #FAF7F2;
+    color: #2D2A26;
+  }
+
+  /* Prevent awkward text selection highlighting during elderly multi-taps */
+  button {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+}
+
+/* Accessibility Text Scaling */
+.text-scale-normal {
+  font-size: 100%;
+}
+
+.text-scale-large {
+  font-size: 112%;
+}
+
+.text-scale-xlarge {
+  font-size: 125%;
+}
+
+/* Print report styling */
+@media print {
+  header, #btn-sos-trigger, #btn-voice-nav, #role-switch-container {
+    display: none !important;
+  }
+  body {
+    background-color: white !important;
+    color: black !important;
+  }
+}
