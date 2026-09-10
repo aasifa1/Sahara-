@@ -17,9 +17,11 @@ import {
   Bell, 
   Calendar,
   Pill,
-  Printer
+  Printer,
+  BookOpen,
+  MessageSquare
 } from 'lucide-react';
-import { CaregiverAlert, CognitiveProfile, GameSession, MoodEntry, ReminderItem } from '../../types';
+import { CaregiverAlert, CognitiveProfile, GameSession, MoodEntry, ReminderItem, DailyJournalEntry, VoiceMessage } from '../../types';
 import { playSoothingChime } from '../../utils/sound';
 
 interface CaregiverDashboardProps {
@@ -30,6 +32,8 @@ interface CaregiverDashboardProps {
   moodHistory: MoodEntry[];
   unsyncedCount: number;
   isOnline: boolean;
+  dailyJournals?: DailyJournalEntry[];
+  voiceMessages?: VoiceMessage[];
   onResolveAlert: (id: string) => void;
   onAddReminder: (reminder: ReminderItem) => void;
   onForceSync: () => void;
@@ -43,11 +47,13 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
   moodHistory,
   unsyncedCount,
   isOnline,
+  dailyJournals = [],
+  voiceMessages = [],
   onResolveAlert,
   onAddReminder,
   onForceSync,
 }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'trends' | 'reminders' | 'alerts' | 'report'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'trends' | 'journals' | 'reminders' | 'alerts' | 'report'>('overview');
   const [showAddReminderModal, setShowAddReminderModal] = useState(false);
 
   // New reminder form
@@ -120,33 +126,27 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
               ) : (
                 <>
                   <WifiOff className="w-4 h-4 text-amber-600" />
-                  <span>Offline ({unsyncedCount} Queued)</span>
+                  <span>Offline ({unsyncedCount} items saved)</span>
                 </>
               )}
             </div>
 
-            <button
-              onClick={onForceSync}
-              className="px-3 py-1.5 rounded-xl bg-[#3B7A57] text-white text-xs font-bold shadow-xs hover:bg-[#2F6346] transition-colors cursor-pointer"
-            >
-              Sync Now
-            </button>
-
-            <button
-              onClick={() => setActiveTab('report')}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-xl border border-[#D9CEB8] bg-white text-[#4A3F35] text-xs font-bold hover:bg-[#FAF7F2] shadow-2xs cursor-pointer"
-            >
-              <FileText className="w-3.5 h-3.5 text-[#3B7A57]" />
-              <span>ASHA Clinical Report</span>
-            </button>
+            {unsyncedCount > 0 && (
+              <button
+                onClick={onForceSync}
+                className="px-3 py-1.5 bg-[#3B7A57] hover:bg-[#2F6346] text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+              >
+                Sync All Telemetry
+              </button>
+            )}
           </div>
         </div>
 
-        {/* 4 Metric Badges */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 pt-5">
+        {/* 4 Clinical Health Counters */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 pt-5">
           <div className="p-3.5 rounded-xl bg-[#FAF8F5] border border-[#EADBCC]">
             <div className="flex items-center justify-between text-xs font-semibold text-[#73675E] mb-1">
-              <span>Memory Score</span>
+              <span>Memory Index</span>
               <Brain className="w-4 h-4 text-[#3B7A57]" />
             </div>
             <div className="text-2xl font-black text-[#2C2724]">
@@ -203,6 +203,7 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
         {[
           { id: 'overview', label: 'AI Insights & Status', icon: <Sparkles className="w-4 h-4" /> },
           { id: 'trends', label: 'Cognitive Trajectory', icon: <TrendingUp className="w-4 h-4" /> },
+          { id: 'journals', label: `Voice Journals & Mental Health (${dailyJournals.length})`, icon: <BookOpen className="w-4 h-4" /> },
           { id: 'reminders', label: 'Care Schedule Manager', icon: <Clock className="w-4 h-4" /> },
           { id: 'alerts', label: `Alerts (${alerts.filter(a => !a.isResolved).length})`, icon: <Bell className="w-4 h-4" /> },
           { id: 'report', label: 'Clinical Export (PDF)', icon: <Printer className="w-4 h-4" /> },
@@ -213,7 +214,7 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
               playSoothingChime('tap');
               setActiveTab(tab.id as any);
             }}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-t-xl transition-all cursor-pointer whitespace-nowrap ${
               activeTab === tab.id
                 ? 'bg-white border-t border-x border-[#E2D8C6] text-[#3B7A57] font-extrabold shadow-2xs'
                 : 'text-[#6C5F53] hover:text-[#2C2724]'
@@ -368,6 +369,175 @@ export const CaregiverDashboard: React.FC<CaregiverDashboardProps> = ({
                 ))}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* TAB: DAILY VOICE JOURNALS & MENTAL HEALTH FOLLOW-UP */}
+      {activeTab === 'journals' && (
+        <div className="bg-white rounded-2xl p-5 sm:p-6 border border-[#E2D8C6] shadow-xs space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#F0EAE1]">
+            <div>
+              <h3 className="text-lg font-black text-[#2C2724] font-['Outfit'] flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-amber-700" />
+                <span>Patient Daily Voice Journals & Mental Health Telemetry</span>
+              </h3>
+              <p className="text-xs sm:text-sm text-[#73675E]">
+                Voice-dictated evening reflections, detected activities, psychological mood indicators, and follow-up notes for caregivers
+              </p>
+            </div>
+            <span className="px-3 py-1 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold self-start sm:self-auto">
+              {dailyJournals.length} Logged Entries
+            </span>
+          </div>
+
+          {/* Quick Mental Health Summary Card for Caregivers */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="p-3.5 rounded-xl bg-[#FAF8F5] border border-[#EADBCC]">
+              <span className="text-xs font-bold text-[#73675E] block mb-1">Overall Emotional Wellbeing</span>
+              <div className="flex items-center gap-2">
+                <Heart className="w-5 h-5 text-rose-500" />
+                <span className="text-lg font-black text-[#2C2724] capitalize">
+                  {dailyJournals.length > 0 ? dailyJournals[0].mood : (latestMood ? latestMood.mood : 'Peaceful')}
+                </span>
+              </div>
+              <p className="text-[11px] text-[#6E645D] mt-1">Based on patient evening voice expressions</p>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-[#FAF8F5] border border-[#EADBCC]">
+              <span className="text-xs font-bold text-[#73675E] block mb-1">Caregiver Action Status</span>
+              <div className="flex items-center gap-2">
+                {dailyJournals.some(j => j.mentalHealthStatus === 'needs_attention') ? (
+                  <>
+                    <AlertTriangle className="w-5 h-5 text-amber-600" />
+                    <span className="text-base font-extrabold text-amber-700">Follow-up Recommended</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600" />
+                    <span className="text-base font-extrabold text-emerald-800">Stable & Comforted</span>
+                  </>
+                )}
+              </div>
+              <p className="text-[11px] text-[#6E645D] mt-1">Monitored continuously by Sahara AI</p>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-[#FAF8F5] border border-[#EADBCC]">
+              <span className="text-xs font-bold text-[#73675E] block mb-1">Conversational AI Memory</span>
+              <div className="flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-[#3B7A57]" />
+                <span className="text-lg font-black text-[#2C2724]">
+                  {voiceMessages.length} Messages
+                </span>
+              </div>
+              <p className="text-[11px] text-[#6E645D] mt-1">All personal dialogues retained securely</p>
+            </div>
+          </div>
+
+          {/* List of Journal Entries */}
+          <div className="space-y-3 pt-2">
+            <h4 className="font-extrabold text-sm text-[#2C2724]">
+              Evening Activity Logs & Caregiver Observations:
+            </h4>
+
+            {dailyJournals.length === 0 ? (
+              <div className="p-8 rounded-2xl bg-[#FAF7F2] border border-dashed border-[#DED2BF] text-center space-y-2">
+                <BookOpen className="w-8 h-8 text-amber-600 mx-auto opacity-70" />
+                <p className="text-sm font-bold text-[#4B3E34]">No voice journals recorded yet today</p>
+                <p className="text-xs text-[#7B6E61]">
+                  When Bhaben Kalita speaks in the Voice Companion (using Evening Journal mode), their dictations, activities, and psychological mood signals will automatically reflect here for caregiver follow-up.
+                </p>
+              </div>
+            ) : (
+              dailyJournals.map((entry) => (
+                <div 
+                  key={entry.id}
+                  className="p-4 rounded-2xl border border-[#E8DFC8] bg-[#FFFDF9] hover:bg-[#FAF7F2] transition-colors space-y-3"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#F0EAE1] pb-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-200">
+                        {entry.date}
+                      </span>
+                      <span className="text-xs font-semibold text-gray-500">
+                        Logged at {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold capitalize ${
+                        entry.mentalHealthStatus === 'needs_attention'
+                          ? 'bg-rose-100 text-rose-800 border border-rose-200'
+                          : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                      }`}>
+                        Mood: {entry.mood} • {entry.mentalHealthStatus.replace('_', ' ')}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="text-xs font-bold text-gray-500 block mb-1">
+                      Patient Voice Recording Transcript:
+                    </span>
+                    <p className="text-xs sm:text-sm italic text-[#302720] bg-white p-3 rounded-xl border border-[#EBE1D0]">
+                      "{entry.audioTranscript}"
+                    </p>
+                  </div>
+
+                  {entry.activities && entry.activities.length > 0 && (
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-xs font-bold text-gray-500">Activities Detected:</span>
+                      {entry.activities.map((act, idx) => (
+                        <span 
+                          key={idx}
+                          className="px-2 py-0.5 rounded-md bg-[#FAF5EA] border border-[#E4D8C5] text-[11px] font-semibold text-[#483B30]"
+                        >
+                          {act}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="p-3 rounded-xl bg-emerald-50/70 border border-emerald-200 text-xs sm:text-sm text-emerald-950">
+                    <strong className="block text-emerald-800 font-bold mb-0.5">
+                      Caregiver Mental Health Follow-Up Note:
+                    </strong>
+                    <span>{entry.caregiverNotes}</span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Recent Voice Conversations Feed */}
+          <div className="pt-4 border-t border-[#F0EAE1] space-y-3">
+            <h4 className="font-extrabold text-sm text-[#2C2724] flex items-center justify-between">
+              <span>Recent Voice Assistant Interactions ({voiceMessages.length})</span>
+              <span className="text-xs font-normal text-[#75685B]">Available for Caregiver Review</span>
+            </h4>
+
+            <div className="max-h-60 overflow-y-auto space-y-2 p-3 rounded-xl bg-[#FAF8F5] border border-[#EADBCC]">
+              {voiceMessages.length === 0 ? (
+                <p className="text-xs text-gray-500 text-center py-4">No voice assistant chats recorded yet.</p>
+              ) : (
+                voiceMessages.slice(-10).map((msg) => (
+                  <div 
+                    key={msg.id}
+                    className={`p-2.5 rounded-xl text-xs sm:text-sm ${
+                      msg.sender === 'user'
+                        ? 'bg-white border border-[#E2D8C6] ml-6'
+                        : 'bg-emerald-50 border border-emerald-200 mr-6 text-emerald-950'
+                    }`}
+                  >
+                    <div className="flex justify-between text-[10px] text-gray-500 font-bold mb-0.5">
+                      <span>{msg.sender === 'user' ? 'Bhaben Kalita (Patient)' : 'Sahara Voice Agent'}</span>
+                      <span>{new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                    <p>{msg.text}</p>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -100,3 +100,25 @@ export interface CognitiveProfile {
   recommendedDifficulty: 1 | 2 | 3;
   lastSessionDate: string;
 }
+
+export interface VoiceMessage {
+  id: string;
+  sender: 'user' | 'assistant';
+  text: string;
+  timestamp: string;
+  language?: string;
+  sentiment?: 'positive' | 'neutral' | 'concerned' | 'anxious' | 'peaceful';
+}
+
+export interface DailyJournalEntry {
+  id: string;
+  date: string; // YYYY-MM-DD or readable
+  summary: string;
+  audioTranscript: string;
+  activities: string[];
+  mood: MoodLevel;
+  mentalHealthStatus: 'stable' | 'positive' | 'needs_attention' | 'low_energy';
+  caregiverNotes: string;
+  timestamp: string;
+}
+

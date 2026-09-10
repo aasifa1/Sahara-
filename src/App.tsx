@@ -24,7 +24,9 @@ import {
   ReminderItem, 
   TextScale, 
   UserRole,
-  MemoryContent
+  MemoryContent,
+  VoiceMessage,
+  DailyJournalEntry
 } from './types';
 import { 
   INITIAL_MEMORIES, 
@@ -139,6 +141,46 @@ export function App() {
     }
   });
 
+  // Persistent Voice Conversations Memory & End-of-day Journals
+  const [voiceMessages, setVoiceMessages] = useState<VoiceMessage[]>(() => {
+    try {
+      const saved = localStorage.getItem('sahara_voice_messages');
+      return saved ? JSON.parse(saved) : [
+        {
+          id: 'vm-init-1',
+          sender: 'assistant',
+          text: 'Hello Dada, I am Sahara. I am here with you all day and I keep your memories safe.',
+          timestamp: new Date(Date.now() - 3600000 * 12).toISOString(),
+          language: 'as',
+          sentiment: 'peaceful'
+        }
+      ];
+    } catch {
+      return [];
+    }
+  });
+
+  const [dailyJournals, setDailyJournals] = useState<DailyJournalEntry[]>(() => {
+    try {
+      const saved = localStorage.getItem('sahara_daily_journals');
+      return saved ? JSON.parse(saved) : [
+        {
+          id: 'jr-init-1',
+          date: 'Yesterday',
+          summary: 'Listened to classical Borgeet, enjoyed courtyard walk with Vikram, and took tea.',
+          audioTranscript: 'I took my morning tea, listened to holy songs, and took a gentle walk around the courtyard.',
+          activities: ['Courtyard walk', 'Warm tea', 'Music listening'],
+          mood: 'peaceful',
+          mentalHealthStatus: 'stable',
+          caregiverNotes: 'Patient was calm and cheerful. Orientation and medication intake optimal.',
+          timestamp: new Date(Date.now() - 3600000 * 24).toISOString(),
+        }
+      ];
+    } catch {
+      return [];
+    }
+  });
+
   // Toast Notification
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -180,11 +222,33 @@ export function App() {
     } catch {}
   }, [alerts]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem('sahara_voice_messages', JSON.stringify(voiceMessages));
+    } catch {}
+  }, [voiceMessages]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sahara_daily_journals', JSON.stringify(dailyJournals));
+    } catch {}
+  }, [dailyJournals]);
+
   // Compute Unsynced Items Count
   const unsyncedReminders = reminders.filter(r => !r.synced).length;
   const unsyncedSessions = gameSessions.filter(s => !s.synced).length;
   const unsyncedMoods = moodHistory.filter(m => !m.synced).length;
   const totalUnsynced = unsyncedReminders + unsyncedSessions + unsyncedMoods;
+
+  // Handlers for voice messages & daily journals
+  const handleSaveVoiceMessage = (msg: VoiceMessage) => {
+    setVoiceMessages(prev => [...prev, msg]);
+  };
+
+  const handleSaveDailyJournal = (journal: DailyJournalEntry) => {
+    setDailyJournals(prev => [journal, ...prev]);
+    showToast('📝 Daily evening voice journal recorded & saved to profile!');
+  };
 
   // Background Sync Trigger
   const handleSync = async () => {
@@ -202,14 +266,21 @@ export function App() {
           reminders,
           gameSessions,
           moodHistory,
-          alerts
+          alerts,
+          voiceConversations: voiceMessages,
+          dailyJournals,
+          patientProfile: {
+            name: 'Bhaben Kalita',
+            primaryCaregiver: 'Vikram Kalita',
+            location: 'Guwahati, Assam'
+          }
         })
       });
     } catch {
       // Local sync completed
     }
 
-    showToast('✨ Local SQLite cache synchronized with cloud successfully!');
+    showToast('✨ Caregiver cloud sync & voice memories updated successfully!');
   };
 
   // Reminders Toggle
@@ -367,6 +438,8 @@ export function App() {
             moodHistory={moodHistory}
             unsyncedCount={totalUnsynced}
             isOnline={isOnline}
+            dailyJournals={dailyJournals}
+            voiceMessages={voiceMessages}
             onResolveAlert={handleResolveAlert}
             onAddReminder={handleAddReminder}
             onForceSync={handleSync}
@@ -545,6 +618,16 @@ export function App() {
           if (action === 'games') setActivePatientTab('games');
           if (action === 'memories') setActivePatientTab('memories');
           if (action === 'sos') setIsSosOpen(true);
+        }}
+        reminders={reminders}
+        voiceMessages={voiceMessages}
+        onSaveVoiceMessage={handleSaveVoiceMessage}
+        dailyJournals={dailyJournals}
+        onSaveDailyJournal={handleSaveDailyJournal}
+        userContext={{
+          patientName: 'Bhaben Kalita',
+          caregiverName: 'Vikram Kalita',
+          latestMood: moodHistory.length > 0 ? moodHistory[moodHistory.length - 1].mood : 'peaceful',
         }}
       />
 

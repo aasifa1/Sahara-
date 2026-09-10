@@ -10,7 +10,15 @@ export default async function handler(req: any, res: any) {
 
   if (req.method === 'POST') {
     const payload = req.body || {};
-    const { reminders = [], gameSessions = [], moodHistory = [], alerts = [] } = payload;
+    const { 
+      reminders = [], 
+      gameSessions = [], 
+      moodHistory = [], 
+      alerts = [],
+      voiceConversations = [],
+      dailyJournals = [],
+      patientProfile = {}
+    } = payload;
 
     return res.status(200).json({
       success: true,
@@ -20,6 +28,8 @@ export default async function handler(req: any, res: any) {
         gameSessionsCount: gameSessions.length,
         moodCount: moodHistory.length,
         alertsCount: alerts.length,
+        voiceConversationsCount: voiceConversations.length,
+        dailyJournalsCount: dailyJournals.length,
       },
       message: 'Caregiver cloud sync telemetry successfully processed'
     });

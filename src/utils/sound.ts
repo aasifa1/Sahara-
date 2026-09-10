@@ -94,16 +94,39 @@ export function speakText(text: string, langCode: string = 'en', onEnd?: () => v
   utterance.rate = 0.85; // Slow, calm cadence for elderly clarity
   utterance.pitch = 1.05; // Friendly warm tone
 
-  // Map app regional languages to browser speech codes if possible
+  // Map common language codes or use langCode directly if provided
   const langMap: Record<string, string> = {
     en: 'en-IN',
     as: 'as-IN',
     bn: 'bn-IN',
     hi: 'hi-IN',
-    mni: 'hi-IN', // fallback to hi-IN if Manipuri voice missing
+    mni: 'hi-IN',
+    ta: 'ta-IN',
+    te: 'te-IN',
+    mr: 'mr-IN',
+    gu: 'gu-IN',
+    kn: 'kn-IN',
+    ml: 'ml-IN',
+    pa: 'pa-IN',
+    ur: 'ur-IN',
+    es: 'es-ES',
+    fr: 'fr-FR',
+    de: 'de-DE',
   };
 
-  utterance.lang = langMap[langCode] || 'en-IN';
+  const targetLang = langMap[langCode] || (langCode.includes('-') ? langCode : `${langCode}-IN`);
+  utterance.lang = targetLang;
+
+  // Try selecting a natural voice matching target language if available
+  try {
+    const voices = window.speechSynthesis.getVoices();
+    if (voices && voices.length > 0) {
+      const matchedVoice = voices.find(v => v.lang === targetLang || v.lang.startsWith(langCode));
+      if (matchedVoice) {
+        utterance.voice = matchedVoice;
+      }
+    }
+  } catch {}
 
   if (onEnd) {
     utterance.onend = onEnd;
