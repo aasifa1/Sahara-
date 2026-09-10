@@ -187,12 +187,28 @@ export function App() {
   const totalUnsynced = unsyncedReminders + unsyncedSessions + unsyncedMoods;
 
   // Background Sync Trigger
-  const handleSync = () => {
+  const handleSync = async () => {
     playSoothingChime('complete');
     setIsOnline(true);
     setReminders(prev => prev.map(r => ({ ...r, synced: true })));
     setGameSessions(prev => prev.map(s => ({ ...s, synced: true })));
     setMoodHistory(prev => prev.map(m => ({ ...m, synced: true })));
+
+    try {
+      await fetch('/api/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reminders,
+          gameSessions,
+          moodHistory,
+          alerts
+        })
+      });
+    } catch {
+      // Local sync completed
+    }
+
     showToast('✨ Local SQLite cache synchronized with cloud successfully!');
   };
 

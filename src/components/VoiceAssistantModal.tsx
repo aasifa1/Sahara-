@@ -31,7 +31,7 @@ export const VoiceAssistantModal: React.FC<VoiceAssistantModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleVoiceCommand = (cmd: string) => {
+  const handleVoiceCommand = async (cmd: string) => {
     playSoothingChime('tap');
     setTranscript(cmd);
 
@@ -59,6 +59,24 @@ export const VoiceAssistantModal: React.FC<VoiceAssistantModalProps> = ({
 
     setAssistantReply(reply);
     speakText(reply, language);
+
+    // Try backend AI Companion API for enhanced cloud intelligence if online
+    try {
+      const res = await fetch('/api/companion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: cmd, language })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.reply && data.reply !== reply) {
+          setAssistantReply(data.reply);
+          speakText(data.reply, language);
+        }
+      }
+    } catch {
+      // Offline fallback already handled
+    }
   };
 
   const toggleMicListening = () => {
