@@ -173,18 +173,21 @@ Please formulate your response to the user.`;
       });
     }
 
-    // Check for specific memory struggle, forgetfulness, or cognitive anxiety
+    // Check for specific memory struggle, forgetfulness, or cognitive anxiety (supporting native scripts and Hinglish/Bengali romanized inputs)
     const isMemoryStruggle = lower.includes('forget') || 
                              lower.includes('remember') || 
                              lower.includes('memory') || 
                              lower.includes('confus') || 
                              lower.includes('lost') || 
+                             lower.includes('bhool') || 
+                             lower.includes('yaad') || 
+                             lower.includes('monot') || 
                              lower.includes('ভুলি') || 
                              lower.includes('মনত নাই') || 
                              lower.includes('भूल') || 
-                             lower.includes('याद नहीं');
+                             lower.includes('याद');
 
-    // Check for emotional venting, mental struggle, loneliness, sadness, or feeling overwhelmed
+    // Check for emotional venting, mental struggle, loneliness, sadness, fear, or feeling overwhelmed
     const isMentalStruggle = lower.includes('struggle') || 
                              lower.includes('sad') || 
                              lower.includes('lonely') || 
@@ -193,14 +196,18 @@ Please formulate your response to the user.`;
                              lower.includes('fear') || 
                              lower.includes('anxious') || 
                              lower.includes('stress') || 
-                             lower.includes('tired of') || 
+                             lower.includes('tired') || 
                              lower.includes('head hurts') || 
                              lower.includes('heavy') || 
                              lower.includes('depress') || 
+                             lower.includes('darr') || 
+                             lower.includes('dar') || 
+                             lower.includes('akela') || 
+                             lower.includes('pareshan') || 
                              lower.includes('অশান্তি') || 
                              lower.includes('ভয়') || 
                              lower.includes('কষ্ট') || 
-                             lower.includes('दुख') || 
+                             lower.includes('দুখ') || 
                              lower.includes('डर') || 
                              lower.includes('परेशान') || 
                              lower.includes('अकेला');
