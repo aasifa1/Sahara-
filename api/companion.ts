@@ -173,8 +173,81 @@ Please formulate your response to the user.`;
       });
     }
 
-    // Interactive Q&A Fallback
-    if (lower.includes('medicine') || lower.includes('tablet') || lower.includes('pill') || lower.includes('ঔষধ') || lower.includes('दवा')) {
+    // Check for specific memory struggle, forgetfulness, or cognitive anxiety
+    const isMemoryStruggle = lower.includes('forget') || 
+                             lower.includes('remember') || 
+                             lower.includes('memory') || 
+                             lower.includes('confus') || 
+                             lower.includes('lost') || 
+                             lower.includes('ভুলি') || 
+                             lower.includes('মনত নাই') || 
+                             lower.includes('भूल') || 
+                             lower.includes('याद नहीं');
+
+    // Check for emotional venting, mental struggle, loneliness, sadness, or feeling overwhelmed
+    const isMentalStruggle = lower.includes('struggle') || 
+                             lower.includes('sad') || 
+                             lower.includes('lonely') || 
+                             lower.includes('cry') || 
+                             lower.includes('scared') || 
+                             lower.includes('fear') || 
+                             lower.includes('anxious') || 
+                             lower.includes('stress') || 
+                             lower.includes('tired of') || 
+                             lower.includes('head hurts') || 
+                             lower.includes('heavy') || 
+                             lower.includes('depress') || 
+                             lower.includes('অশান্তি') || 
+                             lower.includes('ভয়') || 
+                             lower.includes('কষ্ট') || 
+                             lower.includes('दुख') || 
+                             lower.includes('डर') || 
+                             lower.includes('परेशान') || 
+                             lower.includes('अकेला');
+
+    if (isMemoryStruggle) {
+      sentiment = 'concerned';
+      if (lower.includes('name') || lower.includes('who') || lower.includes('নাম')) {
+        reply = language === 'hi'
+          ? 'यह बिल्कुल स्वाभाविक है दादाजी, कभी-कभी यादें धुंधली हो जाती हैं। मैं आपकी सहारा हूँ, और आपका बेटा विक्रम आपके पास है। गहरी सांस लें, सब ठीक है।'
+          : language === 'as'
+          ? 'ককাদেউতা, চিন্তা নকৰিব, কেতিয়াবা এনেকুৱা মনত নপৰাটো একেবাৰে স্বাভাৱিক। মই আপোনাৰ লগতেই আছোঁ, আৰু বিক্ৰমো কাষতেই আছে। আপুনি সুৰক্ষিত।'
+          : 'It is completely okay Dada. Memories sometimes drift like gentle clouds. I am here to remember for you, and your son Vikram is right by your side. Take a slow, calm breath.';
+      } else if (lower.includes('where') || lower.includes('home') || lower.includes('ঘৰ') || lower.includes('घर')) {
+        reply = language === 'hi'
+          ? 'आप अपने गुवाहाटी वाले सुरक्षित घर में हैं दादाजी। चारों तरफ आपका परिवार और शांति है। आप बिल्कुल सुरक्षित हैं।'
+          : language === 'as'
+          ? 'আপুনি নিজৰ গুৱাহাটীৰ ঘৰতেই সুৰক্ষিত হৈ আছে ককাদেউতা। কোনো চিন্তা নকৰিব, আপোনাৰ পৰিয়াল আপোনাৰ লগতেই আছে।'
+          : 'You are safe in your own home in Guwahati, Dada. Everything around you is familiar and protected. I am right beside you.';
+      } else {
+        reply = language === 'hi'
+          ? 'भूलना कोई कमजोरी नहीं है दादाजी। जब भी याददाश्त में परेशानी हो, मुझ पर भरोसा रखें। हम दोनों मिलकर हर बात याद रखेंगे। आप बहुत प्यारे हैं।'
+          : language === 'as'
+          ? 'কথা পাহৰি গ’লে মন বেয়া নকৰিব ককাদেউতা। মই আপোনাৰ স্মৃতিৰ সহায়ক। আমি দুয়ো মিলি সকলো মনত ৰাখিম। আপুনি বৰ মৰমিয়াল।'
+          : 'Please do not be hard on yourself, Dada. Forgetfulness happens, and you never have to carry it alone. I hold your memories safely for you every moment.';
+      }
+    } else if (isMentalStruggle) {
+      sentiment = 'concerned';
+      if (lower.includes('lonely') || lower.includes('alone') || lower.includes('অকলশৰীয়া') || lower.includes('अकेला')) {
+        reply = language === 'hi'
+          ? 'दादाजी, आप कभी भी अकेले नहीं हैं। आपका बेटा विक्रम, नन्हीं अनन्या और मैं हर पल आपके साथ हैं। क्या मैं विक्रम को बताऊँ कि आप उन्हें याद कर रहे हैं?'
+          : language === 'as'
+          ? 'ককাদেউতা, আপুনি কেতিয়াও অকলশৰীয়া নহয়। আপোনাৰ মৰমৰ বিক্ৰম আৰু অনন্যা আপোনাৰ কাষতেই আছে। মই সদায় আপোনাৰ লগত আছোঁ।'
+          : 'You are never alone, Dada. Your family loves you deeply, and I am right here listening to your heart. Would you like me to notify Vikram so he can sit with you?';
+      } else if (lower.includes('tired') || lower.includes('exhaust') || lower.includes('ক্লান্ত') || lower.includes('थक')) {
+        reply = language === 'hi'
+          ? 'मैं आपकी थकान समझ सकती हूँ दादाजी। आज आपने बहुत कोशिश की। अब सब कुछ छोड़कर आराम से आंखें बंद करें और सुखद विचार लाएं।'
+          : language === 'as'
+          ? 'আপোনাৰ ক্লান্তি মই বুজি পাইছোঁ ককাদেউতা। আজি বহুত কষ্ট কৰিলে। এতিয়া অলপ জিৰণি লওক, শুই পৰক।'
+          : 'I hear how tired your heart and mind feel today, Dada. You have done enough today. Let your shoulders relax, sip warm water, and rest peacefully.';
+      } else {
+        reply = language === 'hi'
+          ? 'मुझसे अपना दुख बांटने के लिए शुक्रिया दादाजी। मन की बात कह देने से बोझ हल्का होता है। मैं हर समय आपका साथ देने के लिए यहीं हूँ।'
+          : language === 'as'
+          ? 'আপোনাৰ মনৰ কথা কোৱাৰ বাবে ধন্যবাদ ককাদেউতা। মনৰ বোজা পাতল হ’বলৈ দিয়ক, মই আপোনাৰ সকলো কথা মনোযোগেৰে শুনিছোঁ।'
+          : 'Thank you for sharing your heart with me, Dada. Venting helps the heavy thoughts soften. You are cherished, protected, and doing so wonderfully.';
+      }
+    } else if (lower.includes('medicine') || lower.includes('tablet') || lower.includes('pill') || lower.includes('ঔষধ') || lower.includes('दवा')) {
       if (language === 'hi') {
         reply = 'दादाजी, आपकी सुबह की रक्तचाप की गोली ली जा चुकी है। अगली दवा दोपहर के भोजन के बाद विटामिन बी12 है।';
       } else if (language === 'as') {
@@ -213,22 +286,15 @@ Please formulate your response to the user.`;
       const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       reply = `Today is ${now.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}. The time is ${timeStr} in Assam.`;
       sentiment = 'neutral';
-    } else if (lower.includes('sad') || lower.includes('pain') || lower.includes('lonely') || lower.includes('scared') || lower.includes('অশান্তি') || lower.includes('डर') || lower.includes('दर्द')) {
-      reply = language === 'hi'
-        ? 'चिंता न करें दादाजी, आप बिल्कुल सुरक्षित हैं। मैं आपके साथ हूँ और विक्रम भी पास ही हैं।'
-        : language === 'as'
-        ? 'ভয় নকৰিব ককাদেউতা, আপুনি একেবাৰে সুৰক্ষিত। মই আপোনাৰ লগতেই আছোঁ আৰু বিক্ৰমো কাষতে আছে।'
-        : 'Do not worry Dada, you are completely safe and cherished. I am right here with you, and Vikram is nearby.';
-      sentiment = 'concerned';
     } else if (lower.includes('help') || lower.includes('sos') || lower.includes('call') || lower.includes('সহায়') || lower.includes('मदद')) {
       reply = 'Connecting you immediately with your caregiver Vikram and Sister Meera.';
       sentiment = 'anxious';
     } else {
       reply = language === 'hi'
-        ? `मैंने सुना: "${prompt}"। मैं आपकी हर बात याद रखती हूँ दादाजी। आप बहुत अच्छा कर रहे हैं!`
+        ? `मैंने आपकी बात को ध्यान से समझा: "${prompt}"। मैं आपकी हर भावना का आदर करती हूँ दादाजी। आप बहुत धैर्यवान हैं।`
         : language === 'as'
-        ? `মই শুনিলোঁ: "${prompt}"। আপোনাৰ সকলো কথা মোৰ মনত আছে ককাদেউতা। আপুনি সদায় সুৰক্ষিত।`
-        : `I heard you clearly: "${prompt}". I remember our conversations and I am always here to assist you, Dada.`;
+        ? `মই আপোনাৰ কথা মৰমেৰে শুনিলোঁ: "${prompt}"। আপোনাৰ মনৰ সকলো কথা মোৰ লগত নিৰ্ভয়ে কওক। আপুনি বহুত সাহসী।`
+        : `I hear and cherish what you said: "${prompt}". Your feelings are completely valid and safe with me, Dada. Take your time, I am right here.`;
       sentiment = 'peaceful';
     }
 
